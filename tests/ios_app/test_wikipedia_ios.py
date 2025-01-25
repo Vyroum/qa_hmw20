@@ -7,7 +7,7 @@ from selene import browser, have
                          [('13', 'ios', 'iPhone 11')],
                          ids=['ios'],
                          indirect=True)
-def test_search_and_click(mobile_os_settings):
+def test_text_input(mobile_os_settings):
     with step('Input text'):
         browser.element((AppiumBy.ACCESSIBILITY_ID, 'Text Button')).click()
 
