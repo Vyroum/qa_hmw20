@@ -7,11 +7,9 @@ from selene import browser
 import os
 from dotenv import load_dotenv
 
-import config
 import utils
 from utils import allure_video
 
-from appium import webdriver
 
 @pytest.fixture(scope="session", autouse=True)
 def load_env():
