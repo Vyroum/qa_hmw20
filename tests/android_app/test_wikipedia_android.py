@@ -1,9 +1,13 @@
+import pytest
 from allure_commons._allure import step
 from appium.webdriver.common.appiumby import AppiumBy
 from selene import browser, have
 
-
-def test_search():
+@pytest.mark.parametrize('mobile_os_settings',
+                         [('9.0', 'android', 'Motorola Moto G7 Play')],
+                         ids=['android'],
+                         indirect=True)
+def test_search_and_click():
 
     with step('Searching "Appium"'):
         browser.element((AppiumBy.ACCESSIBILITY_ID, "Search Wikipedia")).click()
@@ -15,5 +19,7 @@ def test_search():
         results.first.should(have.text('Appium'))
 
     with step ('Open "Appium" page'):
-        browser.element((AppiumBy.NAME, "Appium")).click()
+        appium_page = results.first
+        appium_page.click()
+
 
