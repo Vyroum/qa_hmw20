@@ -28,15 +28,16 @@ def mobile_os_settings(request):
     bstack_buld_name = os.getenv("BSTACK_BULD_NAME")
     bstack_session_name = os.getenv("BSTACK_SESSION_NAME")
 
-    platform_version, platform_name, device_name = request.param
-    driver_platform = UiAutomator2Options()
+    os_version, os_name, device_name = request.param
 
-    if platform_name == 'ios':
+    if os_name == "android":
+        driver_platform = UiAutomator2Options()
+    elif os_name == "ios":
         driver_platform = XCUITestOptions()
 
     options = driver_platform.load_capabilities({
-        "platformVersion": platform_version,
-        'platformName': platform_name,
+        "platformVersion": os_version,
+        'platformName': os_name,
         "deviceName": device_name,
 
         "app": bstack_app,
