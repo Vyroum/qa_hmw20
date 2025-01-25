@@ -16,7 +16,7 @@ def load_env():
     load_dotenv()
 
 
-@pytest.fixture(scope='function',
+@pytest.fixture(scope='session',
                 params=[('9.0', 'android', 'Motorola Moto G7 Play')],
                 ids=['base'],
                 autouse=True)
