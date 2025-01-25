@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from allure_commons._allure import step
 from appium.webdriver.common.appiumby import AppiumBy
@@ -10,7 +12,7 @@ from selene import browser, have
 def test_text_input(mobile_os_settings):
     with step('Input text'):
         browser.element((AppiumBy.ACCESSIBILITY_ID, 'Text Button')).click()
-
+        time.sleep(2)
         input_text = browser.element((AppiumBy.ACCESSIBILITY_ID, 'Text Input'))
         input_text.type('qa.guru lesson 19').press_enter()
 
