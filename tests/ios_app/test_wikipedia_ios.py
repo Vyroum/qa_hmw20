@@ -10,7 +10,7 @@ from selene import browser, have
 def test_search_and_click():
 
     with step('Searching page "Open Heart Protocol'):
-        results = browser.all((AppiumBy.ACCESSIBILITY_ID, 'XCUIElementTypeStaticText'))
+        results = browser.all((AppiumBy.ACCESSIBILITY_ID, '	XCUIElementTypeTable'))
         results.should(have.size_greater_than(0))
         results.first.should(have.text('Open Heart Protocol'))
 
