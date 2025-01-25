@@ -7,7 +7,7 @@ from selene import browser, have
                          [('9.0', 'android', 'Motorola Moto G7 Play')],
                          ids=['android'],
                          indirect=True)
-def test_search_and_click():
+def test_search_and_click(mobile_os_settings):
 
     with step('Searching "Appium"'):
         browser.element((AppiumBy.ACCESSIBILITY_ID, "Search Wikipedia")).click()

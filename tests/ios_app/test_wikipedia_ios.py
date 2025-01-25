@@ -7,7 +7,7 @@ from selene import browser, have
                          [('13', 'ios', 'iPhone 11')],
                          ids=['ios'],
                          indirect=True)
-def test_search_and_click():
+def test_search_and_click(mobile_os_settings):
 
     with step('Searching page "Open Heart Protocol'):
         results = browser.all((AppiumBy.ACCESSIBILITY_ID, '	XCUIElementTypeTable'))
