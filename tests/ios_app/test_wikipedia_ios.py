@@ -8,12 +8,12 @@ from selene import browser, have
                          ids=['ios'],
                          indirect=True)
 def test_search_and_click(mobile_os_settings):
+    with step('Input text'):
+        browser.element((AppiumBy.ACCESSIBILITY_ID, 'Text Button')).click()
 
-    with step('Searching page "Open Heart Protocol'):
-        results = browser.all((AppiumBy.ACCESSIBILITY_ID, '	XCUIElementTypeOther'))
-        results.should(have.size_greater_than(0))
-        results.first.should(have.text('Open Heart Protocol'))
+        input_text = browser.element((AppiumBy.ACCESSIBILITY_ID, 'Text Input'))
+        input_text.type('qa.guru lesson 19').press_enter()
 
-    with step ('Open "Open Heart Protocol" page'):
-        appium_page = results.first
-        appium_page.click()
+    with step('Checking input text'):
+        text_output = browser.element((AppiumBy.ACCESSIBILITY_ID, 'Text Output'))
+        text_output.should(have.text('qa.guru lesson 19'))
