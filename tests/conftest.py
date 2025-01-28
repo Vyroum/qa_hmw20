@@ -1,64 +1,61 @@
 import allure
 import pytest
-
+import allure_commons
 from appium.options.android import UiAutomator2Options
-from appium.options.ios import XCUITestOptions
-from selene import browser
-import os
 from dotenv import load_dotenv
-
+from selene import browser, support
+import os
+from selene.support.shared import config
 import utils
 from utils import allure_video
+from utils import file_location
+from appium import webdriver
+import config
 
 
-@pytest.fixture(scope="session", autouse=True)
-def load_env():
-    load_dotenv()
+@pytest.fixture(scope='function', autouse=True)
+def mobile_management():
+    options = UiAutomator2Options()
+    if config.deviceName:
+        options.set_capability('deviceName', config.deviceName)
+    if config.appWaitActivity:
+        options.set_capability('appWaitActivity', config.appWaitActivity)
+    options.set_capability('app', (config.app if config.app.startswith('/') or config.is_bstack
+                                   else utils.file_location.path_to_file(config.app)
+                                   ))
+    with allure.step('init app session'):
+        browser.config.driver = webdriver.Remote(
+            config.remote_url,
+            options=options)
 
-
-@pytest.fixture(scope='session',
-                params=[('9.0', 'android', 'Motorola Moto G7 Play')],
-                ids=['base'],
-                autouse=True)
-def mobile_os_settings(request):
-    bstack_login = os.getenv("BSTACK_LOGIN")
-    bstack_access_key = os.getenv("BSTACK_ACCESS_KEY")
-    bstack_app = os.getenv("BSTACK_APP")
-    bstack_project_name = os.getenv("BSTACK_PROJECT_NAME")
-    bstack_buld_name = os.getenv("BSTACK_BULD_NAME")
-    bstack_session_name = os.getenv("BSTACK_SESSION_NAME")
-
-    os_version, os_name, device_name = request.param
-
-    if os_name == "android":
-        driver_platform = UiAutomator2Options()
-    elif os_name == "ios":
-        driver_platform = XCUITestOptions()
-
-    options = driver_platform.load_capabilities({
-        "platformVersion": os_version,
-        'platformName': os_name,
-        "deviceName": device_name,
-
-        "app": bstack_app,
-
+    if config.is_bstack:
+        with allure.step('init app session'):
+            browser.config.driver = webdriver.Remote(
+                config.remote_url,
+                options=options)
+        load_dotenv()
+        options = UiAutomator2Options().load_capabilities({
+        "platformName": "android",
+        "platformVersion": "9.0",
+        "deviceName": "Motorola Moto G7 Play",
+        "appWaitActivity": "org.wikipedia.*",
+        "appActivity": "org.wikipedia.main.MainActivity",
+        "appPackage": "org.wikipedia.alpha",
         'bstack:options': {
-            "projectName": bstack_project_name,
-            "buildName": bstack_buld_name,
-            "sessionName": bstack_session_name,
-
-            "userName": bstack_login,
-            "accessKey": bstack_access_key
-        }
-    })
-
-    browser.config.driver_remote_url = 'http://hub.browserstack.com/wd/hub'
-    browser.config.driver_options = options
+            "projectName": "Python_project",
+            "buildName": "browserstack-build-1",
+            "sessionName": "BStack_test",
+            'userName': os.getenv("BSTACK_USERNAME"),
+            'accessKey': os.getenv("BSTACK_ACCESSKEY"),
+            'app_url': os.getenv("APP_KEY")
+        }})
 
     browser.config.timeout = float(os.getenv('timeout', '10.0'))
 
+    browser.config._wait_decorator = support._logging.wait_with(
+        context=allure_commons._allure.StepContext
+    )
     yield
-
     allure.attach(
         browser.driver.get_screenshot_as_png(),
         name='screenshot',
@@ -71,8 +68,8 @@ def mobile_os_settings(request):
         attachment_type=allure.attachment_type.XML,
     )
 
-    session_id = browser.driver.session_id
-
     with allure.step('tear down app session'):
         browser.quit()
-    utils.allure_video.attach_bstack_video(session_id)
+    if config.is_bstack:
+        session_id = browser.driver.session_id
+        utils.allure_video.attach_bstack_video(session_id)
