@@ -66,7 +66,7 @@ def mobile_management():
         attachment_type=allure.attachment_type.PNG,
     )
 
-    allure.attach(
+    allure.attach(v
         browser.driver.page_source,
         name='screen xml dump',
         attachment_type=allure.attachment_type.XML,
