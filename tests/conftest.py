@@ -30,25 +30,29 @@ def mobile_management():
 
     if config.is_bstack:
         with allure.step('init app session'):
+            load_dotenv()
+            BSTACK_USERNAME = 'johnkatz1'
+            BSTACK_ACCESSKEY = 'qpvwydACzGG4NcLG4nx8'
+            APP_KEY = 'bs://8a09749887e68fdf72a7e75c2c30c119bf94e285'
+            options = UiAutomator2Options().load_capabilities({
+                "platformName": "android",
+                "platformVersion": "9.0",
+                "deviceName": "Motorola Moto G7 Play",
+                "appWaitActivity": "org.wikipedia.*",
+                "appActivity": "org.wikipedia.main.MainActivity",
+                "appPackage": "org.wikipedia.alpha",
+                'bstack:options': {
+                    "projectName": "Python_project",
+                    "buildName": "browserstack-build-1",
+                    "sessionName": "BStack_test",
+                    'userName': BSTACK_USERNAME,
+                    'accessKey': BSTACK_ACCESSKEY,
+                    'app_url': APP_KEY
+                }})
             browser.config.driver = webdriver.Remote(
-                config.remote_url,
-                options=options)
-        load_dotenv()
-        options = UiAutomator2Options().load_capabilities({
-        "platformName": "android",
-        "platformVersion": "9.0",
-        "deviceName": "Motorola Moto G7 Play",
-        "appWaitActivity": "org.wikipedia.*",
-        "appActivity": "org.wikipedia.main.MainActivity",
-        "appPackage": "org.wikipedia.alpha",
-        'bstack:options': {
-            "projectName": "Python_project",
-            "buildName": "browserstack-build-1",
-            "sessionName": "BStack_test",
-            'userName': os.getenv("BSTACK_USERNAME"),
-            'accessKey': os.getenv("BSTACK_ACCESSKEY"),
-            'app_url': os.getenv("APP_KEY")
-        }})
+            config.remote_url,
+            options=options)
+
 
     browser.config.timeout = float(os.getenv('timeout', '10.0'))
 
