@@ -1,5 +1,4 @@
 import os
-
 import allure
 import allure_commons
 import pytest
@@ -8,20 +7,21 @@ from appium.options.android import UiAutomator2Options
 from dotenv import load_dotenv
 from selene import browser, support
 from selene.support.shared import config
-
 import config
 import utils
 from utils import file_location
+from utils import allure_video
 
 
 @pytest.fixture(scope='function', autouse=True)
 def mobile_management():
+    load_dotenv()
+    BSTACK_USERNAME = os.getenv('BSTACK_USERNAME')
+    BSTACK_ACCESSKEY = os.getenv('BSTACK_ACCESSKEY')
+    APP_KEY = os.getenv('APP_KEY')
+
     if config.is_bstack:
         with allure.step('init app session'):
-            load_dotenv()
-            BSTACK_USERNAME = 'johnkatz1'
-            BSTACK_ACCESSKEY = 'qpvwydACzGG4NcLG4nx8'
-            APP_KEY = 'bs://8a09749887e68fdf72a7e75c2c30c119bf94e285'
             options = UiAutomator2Options().load_capabilities({
                 "platformName": "android",
                 "platformVersion": "9.0",
@@ -40,6 +40,7 @@ def mobile_management():
             browser.config.driver = webdriver.Remote(
                 config.remote_url,
                 options=options)
+            browser.config.timeout = float(os.getenv('timeout', '10.0'))
 
     else:
         options = UiAutomator2Options()
@@ -47,9 +48,8 @@ def mobile_management():
             options.set_capability('deviceName', config.deviceName)
         if config.appWaitActivity:
             options.set_capability('appWaitActivity', config.appWaitActivity)
-        options.set_capability('app', (config.app if config.app.startswith('/') or config.is_bstack
-                                       else utils.file_location.path_to_file(config.app)
-                                       ))
+        options.set_capability('app', utils.file_location.path_to_file(config.app))
+
         with allure.step('init app session'):
             browser.config.driver = webdriver.Remote(
                 config.remote_url,
