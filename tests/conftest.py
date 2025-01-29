@@ -1,33 +1,21 @@
+import os
+
 import allure
-import pytest
 import allure_commons
+import pytest
+from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from dotenv import load_dotenv
 from selene import browser, support
-import os
 from selene.support.shared import config
-import utils
-from utils import allure_video
-from utils import file_location
-from appium import webdriver
+
 import config
+import utils
+from utils import file_location
 
 
 @pytest.fixture(scope='function', autouse=True)
 def mobile_management():
-    options = UiAutomator2Options()
-    if config.deviceName:
-        options.set_capability('deviceName', config.deviceName)
-    if config.appWaitActivity:
-        options.set_capability('appWaitActivity', config.appWaitActivity)
-    options.set_capability('app', (config.app if config.app.startswith('/') or config.is_bstack
-                                   else utils.file_location.path_to_file(config.app)
-                                   ))
-    with allure.step('init app session'):
-        browser.config.driver = webdriver.Remote(
-            config.remote_url,
-            options=options)
-
     if config.is_bstack:
         with allure.step('init app session'):
             load_dotenv()
@@ -38,6 +26,7 @@ def mobile_management():
                 "platformName": "android",
                 "platformVersion": "9.0",
                 "deviceName": "Motorola Moto G7 Play",
+                "app": APP_KEY,
                 "appWaitActivity": "org.wikipedia.*",
                 "appActivity": "org.wikipedia.main.MainActivity",
                 "appPackage": "org.wikipedia.alpha",
@@ -46,13 +35,25 @@ def mobile_management():
                     "buildName": "browserstack-build-1",
                     "sessionName": "BStack_test",
                     'userName': BSTACK_USERNAME,
-                    'accessKey': BSTACK_ACCESSKEY,
-                    'app_url': APP_KEY
+                    'accessKey': BSTACK_ACCESSKEY
                 }})
             browser.config.driver = webdriver.Remote(
-            config.remote_url,
-            options=options)
+                config.remote_url,
+                options=options)
 
+    else:
+        options = UiAutomator2Options()
+        if config.deviceName:
+            options.set_capability('deviceName', config.deviceName)
+        if config.appWaitActivity:
+            options.set_capability('appWaitActivity', config.appWaitActivity)
+        options.set_capability('app', (config.app if config.app.startswith('/') or config.is_bstack
+                                       else utils.file_location.path_to_file(config.app)
+                                       ))
+        with allure.step('init app session'):
+            browser.config.driver = webdriver.Remote(
+                config.remote_url,
+                options=options)
 
     browser.config.timeout = float(os.getenv('timeout', '10.0'))
 
@@ -74,6 +75,6 @@ def mobile_management():
 
     with allure.step('tear down app session'):
         browser.quit()
-    if config.is_bstack:
-        session_id = browser.driver.session_id
-        utils.allure_video.attach_bstack_video(session_id)
+    # if config.is_bstack:
+    #     session_id = browser.driver.session_id
+    #     utils.allure_video.attach_bstack_video(session_id)
