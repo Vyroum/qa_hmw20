@@ -6,25 +6,44 @@ from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from dotenv import load_dotenv
 from selene import browser, support
-from selene.support.shared import config
-import config
+
+
 import utils
-from utils import file_location
 from utils import allure_video
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--env",
+        action="store",
+        default="bstack",
+        help="Environment: emulator, bstack"
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def load_env(request):
+    env = request.config.getoption("--env")
+    env_file = f".env.{env}"
+    load_dotenv(dotenv_path=env_file, override=True)
+    if env_file == ".env.bstack":
+        load_dotenv(".env.bstack_credentials")
+
+
+
 @pytest.fixture(scope='function', autouse=True)
-def mobile_management():
-    load_dotenv()
-
+def mobile_management(load_env):
+    import config
     if config.is_bstack:
-        with allure.step('init app session'):
-            BSTACK_USERNAME = os.getenv('BSTACK_USERNAME')  # Без кавычек
-            BSTACK_ACCESSKEY = os.getenv('BSTACK_ACCESSKEY')
 
+        with allure.step('init app session'):
+            BSTACK_USERNAME = os.getenv("BSTACK_USERNAME")
+            BSTACK_ACCESSKEY = os.getenv("BSTACK_ACCESSKEY")
+            if not BSTACK_USERNAME or not BSTACK_ACCESSKEY:
+                pytest.fail("BrowserStack credentials are missing!")
             options = UiAutomator2Options().load_capabilities({
                 "platformName": "android",
-                "app": config.app,  # Используем APP_KEY из config.py
+                "app": config.app,
                 "appWaitActivity": config.appWaitActivity,
                 "bstack:options": {
                     "projectName": "Python_project",
@@ -32,8 +51,8 @@ def mobile_management():
                     "sessionName": "BStack_test",
                     "userName": BSTACK_USERNAME,
                     "accessKey": BSTACK_ACCESSKEY,
-                    "deviceName": "Motorola Moto G7 Play",  # Перенесено сюда
-                    "platformVersion": "9.0"  # Перенесено сюда
+                    "deviceName": "Motorola Moto G7 Play",
+                    "platformVersion": "9.0"
                 }
             })
             browser.config.driver = webdriver.Remote(
@@ -47,7 +66,7 @@ def mobile_management():
             options.set_capability('deviceName', config.deviceName)
         if config.appWaitActivity:
             options.set_capability('appWaitActivity', config.appWaitActivity)
-        options.set_capability('app', utils.file_location.path_to_file(config.app))
+        options.set_capability('app', config.app)
 
         with allure.step('init app session'):
             browser.config.driver = webdriver.Remote(
