@@ -16,31 +16,30 @@ from utils import allure_video
 @pytest.fixture(scope='function', autouse=True)
 def mobile_management():
     load_dotenv()
-    BSTACK_USERNAME = os.getenv('BSTACK_USERNAME')
-    BSTACK_ACCESSKEY = os.getenv('BSTACK_ACCESSKEY')
-    APP_KEY = os.getenv('APP_KEY')
 
     if config.is_bstack:
         with allure.step('init app session'):
+            BSTACK_USERNAME = os.getenv('BSTACK_USERNAME')  # Без кавычек
+            BSTACK_ACCESSKEY = os.getenv('BSTACK_ACCESSKEY')
+
             options = UiAutomator2Options().load_capabilities({
                 "platformName": "android",
-                "platformVersion": "9.0",
-                "deviceName": "Motorola Moto G7 Play",
-                "app": APP_KEY,
-                "appWaitActivity": "org.wikipedia.*",
-                "appActivity": "org.wikipedia.main.MainActivity",
-                "appPackage": "org.wikipedia.alpha",
-                'bstack:options': {
+                "app": config.app,  # Используем APP_KEY из config.py
+                "appWaitActivity": config.appWaitActivity,
+                "bstack:options": {
                     "projectName": "Python_project",
                     "buildName": "browserstack-build-1",
                     "sessionName": "BStack_test",
-                    'userName': BSTACK_USERNAME,
-                    'accessKey': BSTACK_ACCESSKEY
-                }})
+                    "userName": BSTACK_USERNAME,
+                    "accessKey": BSTACK_ACCESSKEY,
+                    "deviceName": "Motorola Moto G7 Play",  # Перенесено сюда
+                    "platformVersion": "9.0"  # Перенесено сюда
+                }
+            })
             browser.config.driver = webdriver.Remote(
                 config.remote_url,
-                options=options)
-            browser.config.timeout = float(os.getenv('timeout', '10.0'))
+                options=options
+            )
 
     else:
         options = UiAutomator2Options()
