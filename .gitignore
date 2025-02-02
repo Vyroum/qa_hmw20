@@ -1,4 +1,6 @@
 /.idea
 /.venv
 /.env.bstack_credentials
+/.env.bstack
+/.env.emulator
 
